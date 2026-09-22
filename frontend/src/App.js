@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "@/App.css";
 
 const MESSAGES = [
@@ -71,6 +71,54 @@ const SUNFLOWERS = [
   { size: 70, pos: { bottom: "-20px", right: "12%" }, delay: "0.6s", duration: "5.2s" },
 ];
 
+const PETAL_COLORS = ["#FBBF24", "#FBBF24", "#F59E0B", "#F07A57", "#FAD4C0"];
+
+const SONG = [
+  [67, 0.75], [67, 0.25], [69, 1], [67, 1], [72, 1], [71, 2],
+  [67, 0.75], [67, 0.25], [69, 1], [67, 1], [74, 1], [72, 2],
+  [67, 0.75], [67, 0.25], [79, 1], [76, 1], [72, 1], [71, 1], [69, 2],
+  [77, 0.75], [77, 0.25], [76, 1], [72, 1], [74, 1], [72, 2],
+];
+const BEAT = 0.52;
+
+function noteFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function playNote(ctx, master, midi, t, dur) {
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(0.5, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(1.2, dur + 0.4));
+  const o1 = ctx.createOscillator();
+  o1.type = "sine";
+  o1.frequency.value = noteFreq(midi);
+  const o2 = ctx.createOscillator();
+  o2.type = "sine";
+  o2.frequency.value = noteFreq(midi) * 2;
+  const g2 = ctx.createGain();
+  g2.gain.value = 0.22;
+  o1.connect(g);
+  o2.connect(g2);
+  g2.connect(g);
+  g.connect(master);
+  const stop = t + Math.max(1.4, dur + 0.6);
+  o1.start(t);
+  o2.start(t);
+  o1.stop(stop);
+  o2.stop(stop);
+}
+
+function scheduleSong(ctx, master, startAt) {
+  let t = startAt;
+  SONG.forEach(([midi, beats]) => {
+    const dur = beats * BEAT;
+    playNote(ctx, master, midi, t, dur);
+    t += dur;
+  });
+  return t - startAt;
+}
+
 function PetalRing({ front }) {
   return Array.from({ length: 12 }).map((_, i) => (
     <div
@@ -100,10 +148,60 @@ function Sunflower({ size, pos, delay, duration }) {
 export default function App() {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const [petals, setPetals] = useState([]);
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef(null);
   const message = MESSAGES[index];
 
   const next = () => setIndex((i) => (i + 1) % MESSAGES.length);
   const close = () => setOpen(false);
+
+  const openCard = () => {
+    setOpen(true);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setPetals(
+      Array.from({ length: 28 }).map((_, i) => ({
+        id: `${Date.now()}-${i}`,
+        left: Math.random() * 100,
+        w: 10 + Math.random() * 8,
+        h: 16 + Math.random() * 12,
+        color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+        dur: 3.6 + Math.random() * 2.4,
+        delay: Math.random() * 0.9,
+        sway: `${(Math.random() * 2 - 1) * 90}px`,
+        spin: `${(Math.random() * 2 - 1) * 540}deg`,
+      })),
+    );
+    setTimeout(() => setPetals([]), 7600);
+  };
+
+  const toggleMusic = () => {
+    if (playing) {
+      const p = audioRef.current;
+      if (p) {
+        clearTimeout(p.timer);
+        p.master.gain.setTargetAtTime(0.0001, p.ctx.currentTime, 0.3);
+      }
+      setPlaying(false);
+      return;
+    }
+    if (!audioRef.current) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const master = ctx.createGain();
+      master.gain.value = 0.0001;
+      master.connect(ctx.destination);
+      audioRef.current = { ctx, master, timer: null };
+    }
+    const p = audioRef.current;
+    p.ctx.resume();
+    p.master.gain.setTargetAtTime(0.16, p.ctx.currentTime, 0.4);
+    const loop = () => {
+      const dur = scheduleSong(p.ctx, p.master, p.ctx.currentTime + 0.15);
+      p.timer = setTimeout(loop, dur * 1000 + 600);
+    };
+    loop();
+    setPlaying(true);
+  };
 
   return (
     <div className="scene">
@@ -129,7 +227,7 @@ export default function App() {
             className="envelope"
             data-testid="envelope-open-button"
             aria-label="Abrir la carta"
-            onClick={() => setOpen(true)}
+            onClick={openCard}
           >
             <span className="envelope__body" />
             <span className="envelope__flap" />
@@ -175,6 +273,50 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {petals.length > 0 && (
+        <div className="confetti-layer" data-testid="petal-confetti-layer" aria-hidden="true">
+          {petals.map((p) => (
+            <span
+              key={p.id}
+              className="confetti-petal"
+              style={{
+                left: `${p.left}%`,
+                width: p.w,
+                height: p.h,
+                background: p.color,
+                animationDuration: `${p.dur}s`,
+                animationDelay: `${p.delay}s`,
+                "--sway": p.sway,
+                "--spin": p.spin,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        className={playing ? "music-btn music-btn--on" : "music-btn"}
+        data-testid="music-toggle-button"
+        aria-label={playing ? "Pausar música" : "Tocar música"}
+        onClick={toggleMusic}
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F07A57" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H3v6h3l5 4V5z" fill="#F07A57" stroke="none" />
+          {playing ? (
+            <>
+              <path className="wave" d="M15.5 9.5a4 4 0 0 1 0 5" />
+              <path className="wave wave--2" d="M18 7a8 8 0 0 1 0 10" />
+            </>
+          ) : (
+            <>
+              <line x1="16" y1="9" x2="21" y2="14" />
+              <line x1="21" y1="9" x2="16" y2="14" />
+            </>
+          )}
+        </svg>
+      </button>
     </div>
   );
 }

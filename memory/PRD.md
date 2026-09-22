@@ -27,8 +27,16 @@ Single-page romantic Spanglish digital birthday card for Mayté: sunset sky phot
 - Removed template analytics (posthog) per "no analytics" requirement.
 - data-testids on all interactive elements.
 
+### 2026-09-22 (update 1)
+- Title/social preview tags changed to "Happy Birthday Mi Bebecita ✿" (og:title, twitter card, sunset og:image).
+- Built static bundle for self-hosting: /app/mayte-birthday-card/ and /app/mayte-birthday-card.zip (relative asset paths, platform scripts stripped). GitHub Pages instructions given.
+
+### 2026-09-22 (update 2)
+- Petal confetti: 28 CSS petals (sunflower yellow/coral/cream) drift down with sway + spin the moment the envelope opens; auto-cleanup; respects prefers-reduced-motion.
+- Music toggle: fixed speaker button (top-right) plays a soft music-box "Happy Birthday" loop synthesized with Web Audio API (no audio files, works fully static). Animated waves when on, fades out when off.
+- GitHub bundle rebuilt with both features.
+
 ## Backlog / Next Tasks
-- P1: Optional soft music toggle (user explicitly excluded audio for now).
 - P1: Share/customize name + messages via URL params.
-- P2: Petal-fall confetti animation when the card opens.
-- P2: Printable/OG share image for messaging apps.
+- P2: Custom OG share image (sunflower illustration instead of sky photo).
+- P2: Continuous gentle petal drift while the card is open.

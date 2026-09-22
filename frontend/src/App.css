@@ -401,12 +401,114 @@
     box-shadow: 0 9px 20px rgba(240, 122, 87, 0.5);
 }
 
+/* ---------- Petal confetti ---------- */
+
+.confetti-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.confetti-petal {
+    position: absolute;
+    top: -40px;
+    border-radius: 50%;
+    opacity: 0;
+    animation-name: petal-fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes petal-fall {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 0;
+    }
+    8% {
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(var(--sway), 55vh, 0) rotate(var(--spin));
+    }
+    100% {
+        transform: translate3d(calc(var(--sway) * -0.35), 112vh, 0) rotate(calc(var(--spin) * 1.6));
+        opacity: 0.9;
+    }
+}
+
+/* ---------- Music toggle ---------- */
+
+.music-btn {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 40;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 250, 245, 0.94);
+    border: 1px solid rgba(232, 211, 200, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 6px 18px rgba(60, 24, 10, 0.25);
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.music-btn:hover {
+    transform: scale(1.08);
+}
+
+.music-btn:active {
+    transform: scale(0.94);
+}
+
+.music-btn--on {
+    animation: music-pulse 2s ease-in-out infinite;
+}
+
+@keyframes music-pulse {
+    0%,
+    100% {
+        box-shadow: 0 6px 18px rgba(240, 122, 87, 0.4);
+    }
+    50% {
+        box-shadow: 0 6px 26px rgba(240, 122, 87, 0.7);
+    }
+}
+
+.music-btn .wave {
+    animation: wave-blink 1.2s ease-in-out infinite;
+}
+
+.music-btn .wave--2 {
+    animation-delay: 0.3s;
+}
+
+@keyframes wave-blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .sunflower,
     .hint,
     .card,
     .overlay,
-    .card__msg {
+    .card__msg,
+    .music-btn--on,
+    .music-btn .wave {
         animation: none;
     }
 }
