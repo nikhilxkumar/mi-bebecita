@@ -36,7 +36,10 @@ Single-page romantic Spanglish digital birthday card for Mayté: sunset sky phot
 - Music toggle: fixed speaker button (top-right) plays a soft music-box "Happy Birthday" loop synthesized with Web Audio API (no audio files, works fully static). Animated waves when on, fades out when off.
 - GitHub bundle rebuilt with both features.
 
+### 2026-09-22 (update 3)
+- Continuous petals: gentle trickle (~1 petal / 1.3s, slower longer falls) spawns while the card is open, on top of the initial 28-petal burst; each petal self-removes after falling; spawning stops on close and in-flight petals finish naturally. GitHub bundle rebuilt.
+
 ## Backlog / Next Tasks
 - P1: Share/customize name + messages via URL params.
 - P2: Custom OG share image (sunflower illustration instead of sky photo).
-- P2: Continuous gentle petal drift while the card is open.
+- P2: Song choice: 2-3 melody options from the speaker button.

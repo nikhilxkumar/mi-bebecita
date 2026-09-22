@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@/App.css";
 
 const MESSAGES = [
@@ -156,24 +156,36 @@ export default function App() {
   const next = () => setIndex((i) => (i + 1) % MESSAGES.length);
   const close = () => setOpen(false);
 
+  const spawnPetal = (gentle = false) => {
+    const petal = {
+      id: `${Date.now()}-${Math.random()}`,
+      left: Math.random() * 100,
+      w: gentle ? 8 + Math.random() * 6 : 10 + Math.random() * 8,
+      h: gentle ? 13 + Math.random() * 10 : 16 + Math.random() * 12,
+      color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+      dur: gentle ? 6 + Math.random() * 3 : 3.6 + Math.random() * 2.4,
+      delay: gentle ? 0 : Math.random() * 0.9,
+      sway: `${(Math.random() * 2 - 1) * (gentle ? 120 : 90)}px`,
+      spin: `${(Math.random() * 2 - 1) * 540}deg`,
+    };
+    setPetals((cur) => [...cur.slice(-24), petal]);
+    setTimeout(() => {
+      setPetals((cur) => cur.filter((p) => p.id !== petal.id));
+    }, (petal.dur + petal.delay) * 1000 + 300);
+  };
+
   const openCard = () => {
     setOpen(true);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    setPetals(
-      Array.from({ length: 28 }).map((_, i) => ({
-        id: `${Date.now()}-${i}`,
-        left: Math.random() * 100,
-        w: 10 + Math.random() * 8,
-        h: 16 + Math.random() * 12,
-        color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
-        dur: 3.6 + Math.random() * 2.4,
-        delay: Math.random() * 0.9,
-        sway: `${(Math.random() * 2 - 1) * 90}px`,
-        spin: `${(Math.random() * 2 - 1) * 540}deg`,
-      })),
-    );
-    setTimeout(() => setPetals([]), 7600);
+    for (let i = 0; i < 28; i++) spawnPetal();
   };
+
+  useEffect(() => {
+    if (!open) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => spawnPetal(true), 1300);
+    return () => clearInterval(id);
+  }, [open]);
 
   const toggleMusic = () => {
     if (playing) {
