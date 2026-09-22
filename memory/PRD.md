@@ -39,6 +39,9 @@ Single-page romantic Spanglish digital birthday card for Mayté: sunset sky phot
 ### 2026-09-22 (update 3)
 - Continuous petals: gentle trickle (~1 petal / 1.3s, slower longer falls) spawns while the card is open, on top of the initial 28-petal burst; each petal self-removes after falling; spawning stops on close and in-flight petals finish naturally. GitHub bundle rebuilt.
 
+### 2026-09-22 (update 4)
+- Full handoff package: /app/mayte-birthday-card.zip now contains the ready-to-host static site (index.html + static/), the standalone React source (src/, aliases removed, minimal entry), and a README.md with step-by-step GitHub Pages + custom-domain instructions.
+
 ## Backlog / Next Tasks
 - P1: Share/customize name + messages via URL params.
 - P2: Custom OG share image (sunflower illustration instead of sky photo).

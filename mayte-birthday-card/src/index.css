@@ -1,0 +1,20 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #F07A57;
+}
+
+[data-debug-wrapper="true"] {
+    display: contents !important;
+}
